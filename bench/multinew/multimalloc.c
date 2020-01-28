@@ -34,18 +34,26 @@ size_t total_element = (1llu << 20);
 size_t run_iteration = (1llu < 10);
 size_t gran_perround = (1llu << 4);
 size_t thread_number = 4;
+size_t memory_malloc = 1;
 
 pthread_t *workers;
 void ****ptrs;
 
 void *ppmall(void *args) {
     int tid = *(int *) args;
+    for (size_t r = 0; r < run_iteration; r++) {
+        for (size_t i = 0; i < (total_element / thread_number); i++) {
+            if (memory_malloc) ptrs[tid][r][i] = malloc(gran_perround);
+            else ptrs[tid][r][i] = pmalloc(gran_perround);
+        }
+    }
+}
+
+void *pmmall(void *args) {
+    int tid = *(int *) args;
     ptrs[tid] = (void ***) malloc(sizeof(void **) * run_iteration);
     for (size_t r = 0; r < run_iteration; r++) {
         ptrs[tid][r] = (void **) malloc(sizeof(void *) * (total_element / run_iteration));
-        for (size_t i = 0; i < (total_element / thread_number); i++) {
-            ptrs[tid][r][i] = pmalloc(gran_perround);
-        }
     }
 }
 
@@ -53,18 +61,39 @@ void *ppfree(void *args) {
     int tid = *(int *) args;
     for (size_t r = 0; r < run_iteration; r++) {
         for (size_t i = 0; i < (total_element / thread_number); i++) {
-            pfree(ptrs[tid][r][i], gran_perround);
+            if (memory_malloc) free(ptrs[tid][r][i]);
+            else pfree(ptrs[tid][r][i], gran_perround);
         }
+    }
+}
+
+void *pmfree(void *args) {
+    int tid = *(int *) args;
+    for (size_t r = 0; r < run_iteration; r++) {
         free(ptrs[tid][r]);
     }
     free(ptrs[tid]);
+
 }
 
 void multiWorkers() {
     ptrs = (void ****) malloc(sizeof(void ***) * thread_number);
     workers = (pthread_t *) malloc(sizeof(pthread_t) * thread_number);
     struct timeval begTime, endTime;
+
     int *tids = (int *) malloc(sizeof(int) * thread_number);
+    gettimeofday(&begTime, NULL);
+    for (int i = 0; i < thread_number; i++) {
+        tids[i] = i;
+        pthread_create(&workers[i], NULL, pmmall, tids + i);
+    }
+    for (int i = 0; i < thread_number; i++) {
+        pthread_join(workers[i], NULL);
+    }
+    gettimeofday(&endTime, NULL);
+    long duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
+    printf("malloc: %lld\n", duration);
+
     gettimeofday(&begTime, NULL);
     for (int i = 0; i < thread_number; i++) {
         tids[i] = i;
@@ -74,8 +103,9 @@ void multiWorkers() {
         pthread_join(workers[i], NULL);
     }
     gettimeofday(&endTime, NULL);
-    long duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
-    printf("pmalloc: %ll", duration);
+    duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
+    printf("pmalloc: %lld\n", duration);
+
     gettimeofday(&begTime, NULL);
     for (int i = 0; i < thread_number; i++) {
         pthread_create(&workers[i], NULL, ppfree, tids + i);
@@ -83,8 +113,21 @@ void multiWorkers() {
     for (int i = 0; i < thread_number; i++) {
         pthread_join(workers[i], NULL);
     }
+    gettimeofday(&endTime, NULL);
     duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
-    printf("pfree: %ll", duration);
+    printf("pfree: %lld\n", duration);
+
+    gettimeofday(&begTime, NULL);
+    for (int i = 0; i < thread_number; i++) {
+        pthread_create(&workers[i], NULL, pmfree, tids + i);
+    }
+    for (int i = 0; i < thread_number; i++) {
+        pthread_join(workers[i], NULL);
+    }
+    gettimeofday(&endTime, NULL);
+    duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
+    printf("free: %lld\n", duration);
+
     free(workers);
     free(ptrs);
 }
@@ -94,12 +137,14 @@ int main(int argc, char **argv) {
         thread_number = atol(argv[1]);
         total_element = atol(argv[2]);
         run_iteration = atol(argv[3]);
+        memory_malloc = atol(argv[4]);
     }
     struct timeval begin;
     gettimeofday(&begin, NULL);
     int family, model;
     get_family_model(&family, &model);
     printf("%d:%d\t%llu:%llu\n", family, model, begin.tv_sec, begin.tv_usec);
+    printf("%llu\t%llu\t%llu\t%llu\n", thread_number, total_element, run_iteration, gran_perround);
     multiWorkers();
     /*void *ptr = pmalloc(1024);
     pfree(ptr, 1024);*/
