@@ -54,8 +54,8 @@ int init_interposition()
     __lib_pthread_detach = dlsym(RTLD_NEXT, "pthread_detach");
 
     if (__lib_pthread_mutex_lock == NULL || __lib_pthread_mutex_unlock == NULL ||
-    	    __lib_pthread_create == NULL || __lib_pthread_mutex_trylock == NULL ||
-    	    __lib_pthread_detach == NULL) {
+    	    __lib_pthread_create == NULL || __lib_pthread_mutex_trylock == NULL /*||
+    	    __lib_pthread_detach == NULL*/) {
     	error = dlerror();
     	DBG_LOG(ERROR, "Interposition failed: %s\n", error != NULL ? error : "unknown reason");
     	return E_ERROR;
