@@ -33,7 +33,7 @@ void get_family_model(int *family, int *model) {
 size_t total_element = (1llu << 20);
 size_t run_iteration = (1llu < 10);
 size_t gran_perround = (1llu << 4);
-size_t thread_number = 1;
+size_t thread_number = 4;
 
 pthread_t *workers;
 void ****ptrs;
