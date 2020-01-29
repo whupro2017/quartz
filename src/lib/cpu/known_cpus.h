@@ -36,6 +36,7 @@ microarch_ID_t known_cpus[] =
         {.family = 0x06, .model = 0x3F, .microarch = Haswell},
         {.family = 0x06, .model = 0x45, .microarch = Haswell},
         {.family = 0x06, .model = 0x46, .microarch = Haswell},
+        {.family = 0x06, .model = 0x4F, .microarch = Haswell},
         {.family = 0x06, .model = 0x9E, .microarch = Haswell},
 
         // must be the last element
