@@ -128,6 +128,7 @@ void multiWorkers() {
     duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
     printf("free: %lld\n", duration);
 
+    free(tids);
     free(workers);
     free(ptrs);
 }
