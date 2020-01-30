@@ -17,7 +17,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <string.h>
 #include <assert.h>
-#include <errno.h>
+#include <qerrno.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -28,7 +28,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <numaif.h>
 #include <math.h>
 #include "cpu/cpu.h"
-#include "error.h"
+#include "qerror.h"
 #include "model.h"
 
 #define P  (void)printf

@@ -14,7 +14,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <string.h>
 #include "cpu/cpu.h"
 #include "config.h"
-#include "error.h"
+#include "qerror.h"
 #include "thread.h"
 #include "topology.h"
 #include "model.h"

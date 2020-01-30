@@ -14,7 +14,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <stdlib.h>
 #include "cpu/pmc.h"
 #include "dev.h"
-#include "error.h"
+#include "qerror.h"
 #include "thread.h"
 #include "topology.h"
 

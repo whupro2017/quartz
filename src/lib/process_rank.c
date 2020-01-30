@@ -21,7 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <unistd.h>
 #include "model.h"
-#include "error.h"
+#include "qerror.h"
 
 #define EMUL_LOCAL_PROCESSES_VAR "EMUL_LOCAL_PROCESSES"
 

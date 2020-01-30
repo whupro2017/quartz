@@ -18,7 +18,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <stdlib.h>
 #include "cpu/cpu.h"
 #include "utlist.h"
-#include "error.h"
+#include "qerror.h"
 #include "interpose.h"
 #include "model.h"
 #include "thread.h"
