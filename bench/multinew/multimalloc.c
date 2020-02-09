@@ -42,7 +42,7 @@ void ****ptrs;
 void *ppmall(void *args) {
     int tid = *(int *) args;
     for (size_t r = 0; r < run_iteration; r++) {
-        for (size_t i = 0; i < (total_element / thread_number); i++) {
+        for (size_t i = 0; i < (total_element / run_iteration / thread_number); i++) {
             if (memory_malloc) ptrs[tid][r][i] = malloc(gran_perround);
             else ptrs[tid][r][i] = pmalloc(gran_perround);
         }
@@ -60,7 +60,7 @@ void *pmmall(void *args) {
 void *ppfree(void *args) {
     int tid = *(int *) args;
     for (size_t r = 0; r < run_iteration; r++) {
-        for (size_t i = 0; i < (total_element / thread_number); i++) {
+        for (size_t i = 0; i < (total_element / run_iteration / thread_number); i++) {
             if (memory_malloc) free(ptrs[tid][r][i]);
             else pfree(ptrs[tid][r][i], gran_perround);
         }
@@ -106,7 +106,7 @@ void multiWorkers() {
     duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
     printf("pmalloc: %lld\n", duration);
 
-    gettimeofday(&begTime, NULL);
+    /*gettimeofday(&begTime, NULL);
     for (int i = 0; i < thread_number; i++) {
         pthread_create(&workers[i], NULL, ppfree, tids + i);
     }
@@ -115,7 +115,7 @@ void multiWorkers() {
     }
     gettimeofday(&endTime, NULL);
     duration = (endTime.tv_sec - begTime.tv_sec) * 1000000 + endTime.tv_usec - begTime.tv_usec;
-    printf("pfree: %lld\n", duration);
+    printf("pfree: %lld\n", duration);*/
 
     gettimeofday(&begTime, NULL);
     for (int i = 0; i < thread_number; i++) {
