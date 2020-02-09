@@ -25,13 +25,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "stat.h"
 
 static void init() __attribute__((constructor));
+
 static void finalize() __attribute__((destructor));
 
 int set_process_local_rank();
-int unset_process_local_rank();
-int partition_cpus(virtual_topology_t* virtual_topology);
 
-static virtual_topology_t* virtual_topology = NULL;
+int unset_process_local_rank();
+
+int partition_cpus(virtual_topology_t *virtual_topology);
+
+static virtual_topology_t *virtual_topology = NULL;
 
 void finalize() {
     int i;
@@ -40,9 +43,9 @@ void finalize() {
     }
 
     if (read_bw_model.enabled) {
-        for (i=0; i < virtual_topology->num_virtual_nodes; i++) {
+        for (i = 0; i < virtual_topology->num_virtual_nodes; i++) {
             // FIXME: currently we keep a single bandwidth model and not per-node BW model
-            physical_node_t* phys_node = virtual_topology->virtual_nodes[i].nvram_node;
+            physical_node_t *phys_node = virtual_topology->virtual_nodes[i].nvram_node;
             pci_regs_t *regs = phys_node->mc_pci_regs;
 
             // reset throttling
@@ -62,11 +65,10 @@ void finalize() {
     //__cconfig_destroy(&cfg);
 }
 
-void init()
-{
+void init() {
     config_t cfg;
-    cpu_model_t* cpu;
-    char* ld_preload_path;
+    cpu_model_t *cpu;
+    char *ld_preload_path;
     double start_time, end_time;
 #ifdef CALIBRATION_SUPPORT
     int i;
@@ -84,6 +86,7 @@ void init()
     unsetenv("LD_PRELOAD");
 
     if (__cconfig_init(&cfg, "nvmemul.ini") == CONFIG_FALSE) {
+        fprintf(stdout, "EXCEPTION: nvmemul config not found.\n");
         goto error;
     }
 
@@ -91,10 +94,12 @@ void init()
     __cconfig_lookup_bool(&cfg, "bandwidth.enable", &read_bw_model.enabled);
 
     if (dbg_init(&cfg, -1, NULL) != E_SUCCESS) {
+        fprintf(stdout, "EXCEPTION: dbg init failed.\n");
         goto error;
     }
 
     if (init_interposition() != E_SUCCESS) {
+        fprintf(stdout, "EXCEPTION: interposition failed.\n");
         goto error;
     }
 
@@ -106,12 +111,14 @@ void init()
     init_virtual_topology(&cfg, cpu, &virtual_topology);
 
     if (init_bandwidth_model(&cfg, virtual_topology) != E_SUCCESS) {
+        fprintf(stdout, "EXCEPTION: bandwidth failed.\n");
         goto error;
     }
 
     if (latency_model.enabled) {
         if (init_latency_model(&cfg, cpu, virtual_topology) != E_SUCCESS) {
-   	        goto error;
+            fprintf(stdout, "EXCEPTION: latency-setting failed.\n");
+            goto error;
         }
 
         init_thread_manager(&cfg, virtual_topology);
@@ -126,10 +133,12 @@ void init()
         // thread manager must be initialized and local rank set
         // CPU partitioning must be made before the first thread is registered
         if (partition_cpus(virtual_topology) != E_SUCCESS) {
+            fprintf(stdout, "EXCEPTION: topology-setting failed.\n");
             goto error;
         }
 
         if (register_self() != E_SUCCESS) {
+            fprintf(stdout, "EXCEPTION: register_self failed.\n");
             goto error;
         }
 
@@ -160,7 +169,7 @@ void init()
 
     return;
 
-error:
+    error:
     /* Cannot initialize library -- catastrophic error */
     if (ld_preload_path)
         setenv("LD_PRELOAD", ld_preload_path, 1);
