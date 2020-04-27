@@ -28,6 +28,7 @@ microarch_ID_t known_cpus[] =
         // order does not matter
         {.family = 0x06, .model = 0x2A, .microarch = SandyBridge},
         {.family = 0x06, .model = 0x2D, .microarch = SandyBridge},
+        {.family = 0x06, .model = 0x2E, .microarch = SandyBridge},
 
         {.family = 0x06, .model = 0x3A, .microarch = IvyBridge},
         {.family = 0x06, .model = 0x3E, .microarch = IvyBridge},
